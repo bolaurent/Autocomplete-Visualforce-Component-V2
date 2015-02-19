@@ -90,11 +90,26 @@ public class AutoCompleteV2_Con {
     *This method queries data according to the passed parameters
     ***/
     @RemoteAction
-    public static List<AutoCompleteData> getData(String sObjVal,String labelFieldVar,String valueFieldVar,String param){
+    public static List<AutoCompleteData> getData(String sObjVal,String labelFieldVar,String valueFieldVar,String param,String filterClause){
        
         List<AutoCompleteData> AutoCompleteDatas = new List<AutoCompleteData>();
         param = String.escapeSingleQuotes(param);
-        for( Sobject sObj : Database.query('SELECT '+valueFieldVar+','+labelFieldVar+' FROM '+sObjVal+' WHERE '+labelFieldVar+' LIKE \'%'+param+'%\'')){
+        String q = 'SELECT '
+                                           +valueFieldVar
+                                           +','
+                                           +labelFieldVar
+                                           +' FROM '
+                                           +sObjVal
+                                           +' WHERE '
+                                           +labelFieldVar
+                                           +' LIKE \'%'
+                                           +param+'%\'';
+        if (filterClause != Null && filterClause.length() > 0) {
+            q += 'AND ' + filterClause;
+        }
+        
+        system.debug(q);
+        for( Sobject sObj : Database.query(q)){
             AutoCompleteDatas.add(new AutoCompleteData(sObj.get(valueFieldVar),sObj.get(labelFieldVar)));
         }
         
